@@ -25,8 +25,7 @@ jobs:
           distribution: 'corretto'
 
       - name: Compile project
-        run: |
-          ./mvnw clean compile    
+        run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
