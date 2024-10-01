@@ -26,7 +26,6 @@ jobs:
 
       - name: Compile project
         run: |
-          cd book-network
           ./mvnw clean compile    
 
       - name: Configure AWS credentials
