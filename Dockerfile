@@ -1,28 +1,15 @@
-# Build stage
-FROM maven:3.8.7-openjdk-18 AS build
-WORKDIR /build
-COPY pom.xml .
-RUN mvn dependency:go-offline
-COPY src ./src
-RUN mvn clean package -DskipTests
+# Use the official OpenJDK image as a base image
+FROM openjdk:17-jdk-alpine
+LABEL authors="selim-kose@live.com"
 
-# Runtime stage
-FROM amazoncorretto:17
-ARG PROFILE=dev
-ARG APP_VERSION=1.0.1
-
+# Set the working directory inside the container
 WORKDIR /app
-COPY --from=build /build/target/book-network-*.jar /app/
 
-# Extract the JAR version
-RUN APP_VERSION=$(ls /app | grep *.jar | awk 'NR==2{split($0,a,"-"); print a[3]}' | awk '{sub(/.jar$/,"")}1')\
-    && echo "Building container with BSN v-$version"
-EXPOSE 8088
+# Add the Spring Boot JAR file to the container
+COPY target/dockerize-0.0.1-SNAPSHOT.jar app.jar
 
-ENV DB_URL=jdbc:postgresql://db-container:5432/database-name
-ENV MAILDEV_URL=localhost
+# Expose the port that the application runs on
+EXPOSE 8080
 
-ENV ACTIVE_PROFILE=${PROFILE}
-ENV JAR_VERSION=${APP_VERSION}
-
-CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} -Dspring.datasource.url=${DB_URL}  book-network-${JAR_VERSION}.jar
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "app.jar"]
