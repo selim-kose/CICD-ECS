@@ -1,4 +1,6 @@
 name: Backend Pipeline
+## This workflow will build a Java/Spring Boot project with Maven and
+## Build a Docker image, push it to Amazon ECR, and deploy it to Amazon ECS
 
 on:
   push:
@@ -24,7 +26,7 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-      - name: Compile project
+      - name: Package project
         run: mvn clean package -DskipTests
 
       - name: Configure AWS credentials
@@ -42,7 +44,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: test/backend
+          ECR_REPOSITORY: test/backend ${env.ECR_REPOSITORY_NAME}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
